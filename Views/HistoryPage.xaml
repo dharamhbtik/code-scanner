@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodels="clr-namespace:CodeScanner.ViewModels"
+             xmlns:models="clr-namespace:CodeScanner.Models"
+             x:Class="CodeScanner.Views.HistoryPage"
+             x:DataType="viewmodels:HistoryViewModel"
+             Title="Scan History"
+             Shell.NavBarIsVisible="False"
+             BackgroundColor="{StaticResource PageBackground}">
+
+    <Grid RowDefinitions="Auto,*">
+        
+        <!-- Header -->
+        <Grid Grid.Row="0" 
+              ColumnDefinitions="Auto,*,Auto"
+              BackgroundColor="{StaticResource CardBackground}"
+              Padding="16,48,16,16">
+            <Border Grid.Column="0"
+                    WidthRequest="40"
+                    HeightRequest="40"
+                    BackgroundColor="{StaticResource SurfaceColor}"
+                    StrokeThickness="0"
+                    StrokeShape="RoundRectangle 20">
+                <Label Text="←"
+                       FontSize="20"
+                       TextColor="{StaticResource TextPrimary}"
+                       HorizontalOptions="Center"
+                       VerticalOptions="Center"/>
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding GoBackCommand}"/>
+                </Border.GestureRecognizers>
+            </Border>
+            <Label Grid.Column="1" 
+                   Text="Scan History"
+                   Style="{StaticResource TitleLabel}"
+                   FontSize="18"
+                   HorizontalOptions="Center"
+                   VerticalOptions="Center"/>
+            <Button Grid.Column="2"
+                    Text="Clear"
+                    Command="{Binding ClearAllCommand}"
+                    Style="{StaticResource TextButton}"
+                    TextColor="{StaticResource DangerColor}"
+                    IsVisible="{Binding IsEmpty, Converter={StaticResource InverseBoolConverter}}"/>
+        </Grid>
+
+        <!-- Empty State -->
+        <VerticalStackLayout Grid.Row="1"
+                            IsVisible="{Binding IsEmpty}"
+                            VerticalOptions="Center"
+                            HorizontalOptions="Center"
+                            Spacing="16"
+                            Padding="32">
+            <Border WidthRequest="80"
+                    HeightRequest="80"
+                    BackgroundColor="{StaticResource SurfaceColor}"
+                    StrokeThickness="0"
+                    StrokeShape="RoundRectangle 40"
+                    HorizontalOptions="Center">
+                <Label Text="📋"
+                       FontSize="36"
+                       HorizontalOptions="Center"
+                       VerticalOptions="Center"/>
+            </Border>
+            <Label Text="No Scans Yet"
+                   FontSize="20"
+                   FontFamily="OpenSansSemibold"
+                   TextColor="{StaticResource TextPrimary}"
+                   HorizontalOptions="Center"/>
+            <Label Text="Your scan history will appear here after you scan some barcodes."
+                   FontSize="14"
+                   TextColor="{StaticResource TextSecondary}"
+                   HorizontalTextAlignment="Center"/>
+        </VerticalStackLayout>
+
+        <!-- History List -->
+        <CollectionView Grid.Row="1"
+                       ItemsSource="{Binding History}"
+                       IsVisible="{Binding IsEmpty, Converter={StaticResource InverseBoolConverter}}"
+                       Margin="16,16,16,0">
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="models:ScanResult">
+                    <Border Margin="0,0,0,12" Style="{StaticResource CardStyle}">
+                        <SwipeView>
+                            <SwipeView.RightItems>
+                                <SwipeItems>
+                                    <SwipeItem Text="Delete"
+                                              BackgroundColor="{StaticResource DangerColor}"
+                                              Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:HistoryViewModel}}, Path=DeleteItemCommand}"
+                                              CommandParameter="{Binding .}"/>
+                                </SwipeItems>
+                            </SwipeView.RightItems>
+
+                            <Grid RowDefinitions="Auto,Auto,Auto" Padding="16" RowSpacing="12">
+                                <!-- Header with Format Badge and Time -->
+                                <Grid Grid.Row="0" ColumnDefinitions="Auto,*,Auto">
+                                    <Border Grid.Column="0"
+                                            BackgroundColor="{Binding Is2DFormat, Converter={StaticResource FormatBadgeColorConverter}}"
+                                            Opacity="0.15"
+                                            StrokeThickness="0"
+                                            Padding="10,5"
+                                            StrokeShape="RoundRectangle 6">
+                                        <Label Text="{Binding FormatDisplayName}"
+                                               FontSize="12"
+                                               FontFamily="OpenSansSemibold"
+                                               TextColor="{Binding Is2DFormat, Converter={StaticResource FormatBadgeColorConverter}}"/>
+                                    </Border>
+                                    <Label Grid.Column="2"
+                                           Text="{Binding FormattedTimestamp}"
+                                           FontSize="11"
+                                           TextColor="{StaticResource TextTertiary}"
+                                           VerticalOptions="Center"/>
+                                </Grid>
+
+                                <!-- Value -->
+                                <Border Grid.Row="1"
+                                        BackgroundColor="{StaticResource SurfaceColor}"
+                                        StrokeThickness="0"
+                                        Padding="12"
+                                        StrokeShape="RoundRectangle 8">
+                                    <Label Text="{Binding DisplayValue}"
+                                           FontFamily="monospace"
+                                           FontSize="13"
+                                           TextColor="{StaticResource TextPrimary}"
+                                           LineBreakMode="TailTruncation"
+                                           MaxLines="3"/>
+                                </Border>
+
+                                <!-- Action Buttons -->
+                                <HorizontalStackLayout Grid.Row="2" Spacing="8">
+                                    <Button Text="📋 Copy"
+                                            Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:HistoryViewModel}}, Path=CopyToClipboardCommand}"
+                                            CommandParameter="{Binding .}"
+                                            Style="{StaticResource SmallButton}"/>
+                                    <Button Text="📤 Share"
+                                            Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:HistoryViewModel}}, Path=ShareCommand}"
+                                            CommandParameter="{Binding .}"
+                                            Style="{StaticResource SmallButton}"/>
+                                    <Button Text="🌐 Open"
+                                            Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:HistoryViewModel}}, Path=OpenUrlCommand}"
+                                            CommandParameter="{Binding .}"
+                                            IsVisible="{Binding IsUrl}"
+                                            Style="{StaticResource SmallButton}"/>
+                                </HorizontalStackLayout>
+                            </Grid>
+                        </SwipeView>
+                    </Border>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+        <!-- Status Message -->
+        <Border Grid.Row="1"
+                VerticalOptions="End"
+                HorizontalOptions="Center"
+                Margin="0,0,0,24"
+                BackgroundColor="{StaticResource CardBackground}"
+                StrokeThickness="0"
+                Padding="16,10"
+                StrokeShape="RoundRectangle 20"
+                IsVisible="{Binding StatusMessage, Converter={StaticResource StringNotEmptyConverter}}">
+            <Label Text="{Binding StatusMessage}"
+                   FontSize="14"
+                   TextColor="{StaticResource TextPrimary}"/>
+        </Border>
+
+    </Grid>
+</ContentPage>

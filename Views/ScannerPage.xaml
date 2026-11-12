@@ -1,0 +1,249 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodels="clr-namespace:CodeScanner.ViewModels"
+             xmlns:scanner="clr-namespace:BarcodeScanner.Mobile;assembly=BarcodeScanner.Mobile.Maui"
+             x:Class="CodeScanner.Views.ScannerPage"
+             x:DataType="viewmodels:ScannerViewModel"
+             Title="Scanner"
+             Shell.NavBarIsVisible="False"
+             BackgroundColor="#000000">
+
+    <Grid>
+        <!-- Camera View (Full Screen) -->
+        <scanner:CameraView x:Name="CameraView"
+                           HorizontalOptions="FillAndExpand"
+                           VerticalOptions="FillAndExpand"
+                           OnDetected="CameraView_OnDetected"
+                           TorchOn="{Binding IsTorchOn}"
+                           VibrationOnDetected="False"
+                           IsScanning="{Binding IsScanning}"
+                           CaptureQuality="High"
+                           IsVisible="{Binding HasPermission}"/>
+
+        <!-- Scanning Overlay -->
+        <Grid IsVisible="{Binding HasPermission}">
+            <!-- Dark overlay with transparent center -->
+            <BoxView Color="#80000000" 
+                     VerticalOptions="Start"
+                     HeightRequest="150"/>
+            <BoxView Color="#80000000" 
+                     VerticalOptions="End"
+                     HeightRequest="250"/>
+
+            <!-- Scan Frame -->
+            <Border HorizontalOptions="Center"
+                    VerticalOptions="Center"
+                    WidthRequest="280"
+                    HeightRequest="280"
+                    BackgroundColor="Transparent"
+                    Stroke="{StaticResource PrimaryColor}"
+                    StrokeThickness="3"
+                    StrokeShape="RoundRectangle 16">
+                
+                <!-- Animated Scan Line -->
+                <BoxView x:Name="ScanLine"
+                         WidthRequest="260"
+                         HeightRequest="2"
+                         BackgroundColor="{StaticResource PrimaryColor}"
+                         HorizontalOptions="Center"
+                         VerticalOptions="Start"
+                         Margin="0,10,0,0"
+                         Opacity="0.8"/>
+            </Border>
+
+            <!-- Corner Accents -->
+            <Grid HorizontalOptions="Center" 
+                  VerticalOptions="Center"
+                  WidthRequest="290"
+                  HeightRequest="290">
+                <!-- Top Left -->
+                <BoxView WidthRequest="40" HeightRequest="4" 
+                         BackgroundColor="{StaticResource AccentColor}"
+                         HorizontalOptions="Start" VerticalOptions="Start"/>
+                <BoxView WidthRequest="4" HeightRequest="40" 
+                         BackgroundColor="{StaticResource AccentColor}"
+                         HorizontalOptions="Start" VerticalOptions="Start"/>
+                <!-- Top Right -->
+                <BoxView WidthRequest="40" HeightRequest="4" 
+                         BackgroundColor="{StaticResource AccentColor}"
+                         HorizontalOptions="End" VerticalOptions="Start"/>
+                <BoxView WidthRequest="4" HeightRequest="40" 
+                         BackgroundColor="{StaticResource AccentColor}"
+                         HorizontalOptions="End" VerticalOptions="Start"/>
+                <!-- Bottom Left -->
+                <BoxView WidthRequest="40" HeightRequest="4" 
+                         BackgroundColor="{StaticResource AccentColor}"
+                         HorizontalOptions="Start" VerticalOptions="End"/>
+                <BoxView WidthRequest="4" HeightRequest="40" 
+                         BackgroundColor="{StaticResource AccentColor}"
+                         HorizontalOptions="Start" VerticalOptions="End"/>
+                <!-- Bottom Right -->
+                <BoxView WidthRequest="40" HeightRequest="4" 
+                         BackgroundColor="{StaticResource AccentColor}"
+                         HorizontalOptions="End" VerticalOptions="End"/>
+                <BoxView WidthRequest="4" HeightRequest="40" 
+                         BackgroundColor="{StaticResource AccentColor}"
+                         HorizontalOptions="End" VerticalOptions="End"/>
+            </Grid>
+        </Grid>
+
+        <!-- Top Bar -->
+        <Grid ColumnDefinitions="Auto,*,Auto" 
+              Padding="16,48,16,16"
+              VerticalOptions="Start">
+            <!-- Back Button -->
+            <Border Grid.Column="0"
+                    WidthRequest="44"
+                    HeightRequest="44"
+                    BackgroundColor="#80000000"
+                    StrokeThickness="0"
+                    StrokeShape="RoundRectangle 22">
+                <Label Text="←"
+                       FontSize="24"
+                       TextColor="White"
+                       HorizontalOptions="Center"
+                       VerticalOptions="Center"/>
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding GoBackCommand}"/>
+                </Border.GestureRecognizers>
+            </Border>
+
+            <!-- Status -->
+            <Border Grid.Column="1"
+                    BackgroundColor="#80000000"
+                    StrokeThickness="0"
+                    Padding="16,8"
+                    HorizontalOptions="Center"
+                    StrokeShape="RoundRectangle 16">
+                <Label Text="{Binding StatusMessage}"
+                       TextColor="White"
+                       FontSize="14"
+                       HorizontalOptions="Center"/>
+            </Border>
+
+            <!-- Torch Button -->
+            <Border Grid.Column="2"
+                    WidthRequest="44"
+                    HeightRequest="44"
+                    BackgroundColor="{Binding IsTorchOn, Converter={StaticResource TorchBackgroundConverter}}"
+                    StrokeThickness="0"
+                    StrokeShape="RoundRectangle 22">
+                <Label Text="💡"
+                       FontSize="20"
+                       HorizontalOptions="Center"
+                       VerticalOptions="Center"/>
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding ToggleTorchCommand}"/>
+                </Border.GestureRecognizers>
+            </Border>
+        </Grid>
+
+        <!-- Permission Denied View -->
+        <VerticalStackLayout IsVisible="{Binding PermissionDenied}"
+                            VerticalOptions="Center"
+                            HorizontalOptions="Center"
+                            Spacing="16"
+                            Padding="32">
+            <Label Text="📷"
+                   FontSize="64"
+                   HorizontalOptions="Center"/>
+            <Label Text="Camera Permission Required"
+                   FontSize="20"
+                   FontFamily="OpenSansSemibold"
+                   TextColor="White"
+                   HorizontalOptions="Center"/>
+            <Label Text="Please grant camera permission in your device settings to use the scanner."
+                   FontSize="14"
+                   TextColor="#AAAAAA"
+                   HorizontalTextAlignment="Center"/>
+            <Button Text="Go Back"
+                    Command="{Binding GoBackCommand}"
+                    Style="{StaticResource SecondaryButton}"
+                    Margin="0,16,0,0"/>
+        </VerticalStackLayout>
+
+        <!-- Result Overlay -->
+        <Grid IsVisible="{Binding ShowResult}" 
+              BackgroundColor="#E6000000">
+            <Border VerticalOptions="Center"
+                    HorizontalOptions="Center"
+                    Margin="24"
+                    BackgroundColor="{StaticResource CardBackground}"
+                    StrokeThickness="0"
+                    StrokeShape="RoundRectangle 24"
+                    MaximumWidthRequest="400">
+                <VerticalStackLayout Padding="24" Spacing="16">
+                    <!-- Success Icon -->
+                    <Border WidthRequest="64"
+                            HeightRequest="64"
+                            BackgroundColor="{StaticResource SuccessColorLight}"
+                            StrokeThickness="0"
+                            StrokeShape="RoundRectangle 32"
+                            HorizontalOptions="Center">
+                        <Label Text="✓"
+                               FontSize="32"
+                               TextColor="{StaticResource SuccessColor}"
+                               HorizontalOptions="Center"
+                               VerticalOptions="Center"/>
+                    </Border>
+
+                    <!-- Format Badge -->
+                    <Border BackgroundColor="{StaticResource PrimaryColorLight}"
+                            StrokeThickness="0"
+                            Padding="12,6"
+                            StrokeShape="RoundRectangle 8"
+                            HorizontalOptions="Center">
+                        <Label Text="{Binding LastResult.FormatDisplayName}"
+                               FontSize="14"
+                               FontFamily="OpenSansSemibold"
+                               TextColor="{StaticResource PrimaryColor}"/>
+                    </Border>
+
+                    <!-- Value -->
+                    <Border BackgroundColor="{StaticResource SurfaceColor}"
+                            StrokeThickness="0"
+                            Padding="16"
+                            StrokeShape="RoundRectangle 12">
+                        <Label Text="{Binding LastResult.DisplayValue}"
+                               FontFamily="monospace"
+                               FontSize="14"
+                               TextColor="{StaticResource TextPrimary}"
+                               LineBreakMode="WordWrap"
+                               MaxLines="8"/>
+                    </Border>
+
+                    <!-- Timestamp -->
+                    <Label Text="{Binding LastResult.FormattedTimestamp}"
+                           FontSize="12"
+                           TextColor="{StaticResource TextSecondary}"
+                           HorizontalOptions="Center"/>
+
+                    <!-- Action Buttons -->
+                    <Grid ColumnDefinitions="*,*,*" ColumnSpacing="12">
+                        <Button Grid.Column="0"
+                                Text="📋"
+                                Command="{Binding CopyToClipboardCommand}"
+                                Style="{StaticResource IconButton}"/>
+                        <Button Grid.Column="1"
+                                Text="📤"
+                                Command="{Binding ShareCommand}"
+                                Style="{StaticResource IconButton}"/>
+                        <Button Grid.Column="2"
+                                Text="🌐"
+                                Command="{Binding OpenUrlCommand}"
+                                IsVisible="{Binding LastResult.IsUrl}"
+                                Style="{StaticResource IconButton}"/>
+                    </Grid>
+
+                    <!-- Continue Button -->
+                    <Button Text="Scan Another"
+                            Command="{Binding ContinueScanningCommand}"
+                            Style="{StaticResource PrimaryButton}"
+                            HeightRequest="48"
+                            CornerRadius="12"/>
+                </VerticalStackLayout>
+            </Border>
+        </Grid>
+    </Grid>
+</ContentPage>

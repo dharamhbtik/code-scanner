@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodels="clr-namespace:CodeScanner.ViewModels"
+             xmlns:models="clr-namespace:CodeScanner.Models"
+             x:Class="CodeScanner.Views.FormatSelectionPage"
+             x:DataType="viewmodels:FormatSelectionViewModel"
+             Title="Barcode Formats"
+             Shell.NavBarIsVisible="False"
+             BackgroundColor="{StaticResource PageBackground}">
+
+    <Grid RowDefinitions="Auto,*,Auto">
+        
+        <!-- Header -->
+        <Grid Grid.Row="0" 
+              ColumnDefinitions="Auto,*,Auto"
+              BackgroundColor="{StaticResource CardBackground}"
+              Padding="16,48,16,16">
+            <Button Grid.Column="0"
+                    Text="Cancel"
+                    Command="{Binding CancelCommand}"
+                    Style="{StaticResource TextButton}"/>
+            <VerticalStackLayout Grid.Column="1" 
+                                 HorizontalOptions="Center"
+                                 Spacing="2">
+                <Label Text="Barcode Formats"
+                       Style="{StaticResource TitleLabel}"
+                       FontSize="18"
+                       HorizontalOptions="Center"/>
+                <Label Text="{Binding SelectedCount, StringFormat='{0} selected'}"
+                       Style="{StaticResource CaptionLabel}"
+                       HorizontalOptions="Center"/>
+            </VerticalStackLayout>
+            <Button Grid.Column="2"
+                    Text="Save"
+                    Command="{Binding SaveCommand}"
+                    Style="{StaticResource TextButton}"
+                    TextColor="{StaticResource PrimaryColor}"/>
+        </Grid>
+
+        <!-- Format Lists -->
+        <ScrollView Grid.Row="1" Padding="16">
+            <VerticalStackLayout Spacing="24">
+                
+                <!-- 2D Barcodes Section -->
+                <VerticalStackLayout Spacing="12">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <VerticalStackLayout Grid.Column="0">
+                            <Label Text="2D Barcodes"
+                                   Style="{StaticResource SectionHeaderLabel}"/>
+                            <Label Text="Recommended for most use cases"
+                                   Style="{StaticResource CaptionLabel}"/>
+                        </VerticalStackLayout>
+                        <Button Grid.Column="1"
+                                Text="Select All"
+                                Command="{Binding SelectAll2DCommand}"
+                                Style="{StaticResource SmallTextButton}"/>
+                    </Grid>
+                    
+                    <Border Style="{StaticResource CardStyle}" Padding="0">
+                        <VerticalStackLayout BindableLayout.ItemsSource="{Binding Formats2D}">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate x:DataType="models:BarcodeFormatItem">
+                                    <Grid ColumnDefinitions="*,Auto" Padding="16,12">
+                                        <VerticalStackLayout Grid.Column="0" Spacing="2">
+                                            <Label Text="{Binding DisplayName}"
+                                                   Style="{StaticResource BodyLabel}"
+                                                   FontFamily="OpenSansSemibold"/>
+                                            <Label Text="{Binding Description}"
+                                                   Style="{StaticResource CaptionLabel}"
+                                                   LineBreakMode="TailTruncation"/>
+                                        </VerticalStackLayout>
+                                        <CheckBox Grid.Column="1" 
+                                                  IsChecked="{Binding IsSelected}"
+                                                  Color="{StaticResource PrimaryColor}"
+                                                  VerticalOptions="Center"/>
+                                    </Grid>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </VerticalStackLayout>
+                    </Border>
+                </VerticalStackLayout>
+
+                <!-- Linear Barcodes Section -->
+                <VerticalStackLayout Spacing="12">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <VerticalStackLayout Grid.Column="0">
+                            <Label Text="Linear Barcodes"
+                                   Style="{StaticResource SectionHeaderLabel}"/>
+                            <Label Text="Traditional 1D barcodes"
+                                   Style="{StaticResource CaptionLabel}"/>
+                        </VerticalStackLayout>
+                        <Button Grid.Column="1"
+                                Text="Deselect All"
+                                Command="{Binding DeselectAllLinearCommand}"
+                                Style="{StaticResource SmallTextButton}"/>
+                    </Grid>
+                    
+                    <Border Style="{StaticResource CardStyle}" Padding="0">
+                        <VerticalStackLayout BindableLayout.ItemsSource="{Binding FormatsLinear}">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate x:DataType="models:BarcodeFormatItem">
+                                    <Grid ColumnDefinitions="*,Auto" Padding="16,12">
+                                        <VerticalStackLayout Grid.Column="0" Spacing="2">
+                                            <Label Text="{Binding DisplayName}"
+                                                   Style="{StaticResource BodyLabel}"
+                                                   FontFamily="OpenSansSemibold"/>
+                                            <Label Text="{Binding Description}"
+                                                   Style="{StaticResource CaptionLabel}"
+                                                   LineBreakMode="TailTruncation"/>
+                                        </VerticalStackLayout>
+                                        <CheckBox Grid.Column="1" 
+                                                  IsChecked="{Binding IsSelected}"
+                                                  Color="{StaticResource AccentColor}"
+                                                  VerticalOptions="Center"/>
+                                    </Grid>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </VerticalStackLayout>
+                    </Border>
+                </VerticalStackLayout>
+
+                <!-- Info Card -->
+                <Border BackgroundColor="{StaticResource InfoColorLight}"
+                        StrokeThickness="0"
+                        Padding="16"
+                        StrokeShape="RoundRectangle 12">
+                    <HorizontalStackLayout Spacing="12">
+                        <Label Text="ℹ"
+                               FontSize="20"
+                               TextColor="{StaticResource InfoColor}"
+                               VerticalOptions="Start"/>
+                        <Label Text="Selecting fewer formats improves scanning speed. 2D barcodes are recommended for QR codes, tickets, and modern applications."
+                               Style="{StaticResource CaptionLabel}"
+                               TextColor="{StaticResource InfoColor}"/>
+                    </HorizontalStackLayout>
+                </Border>
+
+                <!-- Bottom spacing -->
+                <BoxView HeightRequest="24" Color="Transparent"/>
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <!-- Bottom Action -->
+        <Border Grid.Row="2" 
+                BackgroundColor="{StaticResource CardBackground}"
+                StrokeThickness="0"
+                Padding="24,16,24,32">
+            <Button Text="Select All Formats"
+                    Command="{Binding SelectAllFormatsCommand}"
+                    Style="{StaticResource SecondaryButton}"
+                    HeightRequest="48"
+                    CornerRadius="12"/>
+        </Border>
+
+    </Grid>
+</ContentPage>
